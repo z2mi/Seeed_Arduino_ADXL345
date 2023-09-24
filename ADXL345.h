@@ -29,7 +29,7 @@
  */
  
 #include "Arduino.h"
-
+#include "Wire.h"
 #ifndef ADXL345_h
 #define ADXL345_h
 
@@ -144,7 +144,7 @@ public:
     byte error_code;       // Initial state
     double gains[3];        // counts to Gs
     
-    ADXL345();
+    ADXL345(TwoWire& wire);
     void powerOn();
     void readAccel(int* xyx);
     void readXYZ(int* x, int* y, int* z);
@@ -247,6 +247,7 @@ private:
     void setRegisterBit(byte regAdress, int bitPos, bool state);
     bool getRegisterBit(byte regAdress, int bitPos);  
     byte _buff[6] ;    //6 bytes buffer for saving data read from the device
+    TwoWire *wire ;
 };
 void print_byte(byte val);
 #endif

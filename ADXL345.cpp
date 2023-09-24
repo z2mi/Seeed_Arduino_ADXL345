@@ -35,7 +35,8 @@
 #define ADXL345_DEVICE (0x53)    // ADXL345 device address
 #define ADXL345_TO_READ (6)      // num of bytes we are going to read each time (two bytes for each axis)
 
-ADXL345::ADXL345() {
+ADXL345::ADXL345(TwoWire& wire)
+: wire(&wire) {
 
     status = ADXL345_OK;
     error_code = ADXL345_NO_ERROR;
@@ -99,7 +100,7 @@ void ADXL345::init()
 
 void ADXL345::powerOn() {
     
-    Wire.begin();        // join i2c bus (address optional for master)
+    wire->begin();        // join i2c bus (address optional for master)
     //Turning on the ADXL345
     writeTo(ADXL345_POWER_CTL, 0);
     writeTo(ADXL345_POWER_CTL, 16);
@@ -127,32 +128,32 @@ void ADXL345::getAcceleration(double *xyz){
 }
 // Writes val to address register on device
 void ADXL345::writeTo(byte address, byte val) {
-    Wire.beginTransmission(ADXL345_DEVICE); // start transmission to device
-    Wire.write(address);             // send register address
-    Wire.write(val);                 // send value to write
-    Wire.endTransmission();         // end transmission
+    wire->beginTransmission(ADXL345_DEVICE); // start transmission to device
+    wire->write(address);             // send register address
+    wire->write(val);                 // send value to write
+    wire->endTransmission();         // end transmission
 }
 
 // Reads num bytes starting from address register on device in to _buff array
 void ADXL345::readFrom(byte address, int num, byte _buff[]) {
-    Wire.beginTransmission(ADXL345_DEVICE); // start transmission to device
-    Wire.write(address);             // sends address to read from
-    Wire.endTransmission();         // end transmission
+    wire->beginTransmission(ADXL345_DEVICE); // start transmission to device
+    wire->write(address);             // sends address to read from
+    wire->endTransmission();         // end transmission
 
-    Wire.beginTransmission(ADXL345_DEVICE); // start transmission to device
-    Wire.requestFrom(ADXL345_DEVICE, num);    // request 6 bytes from device
+    wire->beginTransmission(ADXL345_DEVICE); // start transmission to device
+    wire->requestFrom(ADXL345_DEVICE, num);    // request 6 bytes from device
 
     int i = 0;
-    while(Wire.available())         // device may send less than requested (abnormal)
+    while(wire->available())         // device may send less than requested (abnormal)
     {
-        _buff[i] = Wire.read();    // receive a byte
+        _buff[i] = wire->read();    // receive a byte
         i++;
     }
     if(i != num){
         status = ADXL345_ERROR;
         error_code = ADXL345_READ_ERROR;
     }
-    Wire.endTransmission();         // end transmission
+    wire->endTransmission();         // end transmission
 }
 
 // Gets the range setting and return it into rangeSetting
